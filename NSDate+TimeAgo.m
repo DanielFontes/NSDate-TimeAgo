@@ -58,6 +58,7 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
 - (NSString *)timeAgo
 {
     NSDate *now = [NSDate date];
+    BOOL isFuture = ([self timeIntervalSinceDate:now] > 0);
     double deltaSeconds = fabs([self timeIntervalSinceDate:now]);
     double deltaMinutes = deltaSeconds / 60.0f;
     
@@ -65,63 +66,63 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
     
     if(deltaSeconds < 5)
     {
-        return NSDateTimeAgoLocalizedStrings(@"Just now");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Now":@"Just now");
     }
     else if(deltaSeconds < 60)
     {
-        return [self stringFromFormat:@"%%d %@seconds ago" withValue:deltaSeconds];
+        return [self stringFromFormat:isFuture?@"In %%d %@seconds":@"%%d %@seconds ago" withValue:deltaSeconds];
     }
     else if(deltaSeconds < 120)
     {
-        return NSDateTimeAgoLocalizedStrings(@"A minute ago");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"In a minute":@"A minute ago");
     }
     else if (deltaMinutes < 60)
     {
-        return [self stringFromFormat:@"%%d %@minutes ago" withValue:deltaMinutes];
+        return [self stringFromFormat:isFuture?@"In %%d %@minutes":@"%%d %@minutes ago" withValue:deltaMinutes];
     }
     else if (deltaMinutes < 120)
     {
-        return NSDateTimeAgoLocalizedStrings(@"An hour ago");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"In an hour":@"An hour ago");
     }
     else if (deltaMinutes < (24 * 60))
     {
         minutes = (int)floor(deltaMinutes/60);
-        return [self stringFromFormat:@"%%d %@hours ago" withValue:minutes];
+        return [self stringFromFormat:isFuture?@"In %%d %@hours":@"%%d %@hours ago" withValue:minutes];
     }
     else if (deltaMinutes < (24 * 60 * 2))
     {
-        return NSDateTimeAgoLocalizedStrings(@"Yesterday");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Tomorrow":@"Yesterday");
     }
     else if (deltaMinutes < (24 * 60 * 7))
     {
         minutes = (int)floor(deltaMinutes/(60 * 24));
-        return [self stringFromFormat:@"%%d %@days ago" withValue:minutes];
+        return [self stringFromFormat:isFuture?@"In %%d %@days":@"%%d %@days ago" withValue:minutes];
     }
     else if (deltaMinutes < (24 * 60 * 14))
     {
-        return NSDateTimeAgoLocalizedStrings(@"Last week");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Next week":@"Last week");
     }
     else if (deltaMinutes < (24 * 60 * 31))
     {
         minutes = (int)floor(deltaMinutes/(60 * 24 * 7));
-        return [self stringFromFormat:@"%%d %@weeks ago" withValue:minutes];
+        return [self stringFromFormat:isFuture?@"In %%d %@weeks":@"%%d %@weeks ago" withValue:minutes];
     }
     else if (deltaMinutes < (24 * 60 * 61))
     {
-        return NSDateTimeAgoLocalizedStrings(@"Last month");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Next month":@"Last month");
     }
     else if (deltaMinutes < (24 * 60 * 365.25))
     {
         minutes = (int)floor(deltaMinutes/(60 * 24 * 30));
-        return [self stringFromFormat:@"%%d %@months ago" withValue:minutes];
+        return [self stringFromFormat:isFuture?@"In %%d %@months":@"%%d %@months ago" withValue:minutes];
     }
     else if (deltaMinutes < (24 * 60 * 731))
     {
-        return NSDateTimeAgoLocalizedStrings(@"Last year");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Next year":@"Last year");
     }
     
     minutes = (int)floor(deltaMinutes/(60 * 24 * 365));
-    return [self stringFromFormat:@"%%d %@years ago" withValue:minutes];
+    return [self stringFromFormat:isFuture?@"In %%d %@years":@"%%d %@years ago" withValue:minutes];
 }
 
 // Similar to timeAgo, but only returns "
@@ -129,6 +130,7 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
 {
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDate * now = [NSDate date];
+    BOOL isFuture = ([self timeIntervalSinceDate:now] > 0);
     NSDateComponents *components = [calendar components:
                                     NSYearCalendarUnit|
                                     NSMonthCalendarUnit|
@@ -137,65 +139,65 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
                                     NSHourCalendarUnit|
                                     NSMinuteCalendarUnit|
                                     NSSecondCalendarUnit
-                                               fromDate:self
-                                                 toDate:now
+                                               fromDate:isFuture?now:self
+                                                 toDate:isFuture?self:now
                                                 options:0];
     
     if (components.year >= 1)
     {
         if (components.year == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"1 year ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In 1 year":@"1 year ago");
         }
-        return [self stringFromFormat:@"%%d %@years ago" withValue:components.year];
+        return [self stringFromFormat:isFuture?@"In %%d %@years":@"%%d %@years ago" withValue:components.year];
     }
     else if (components.month >= 1)
     {
         if (components.month == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"1 month ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In 1 month":@"1 month ago");
         }
-        return [self stringFromFormat:@"%%d %@months ago" withValue:components.month];
+        return [self stringFromFormat:isFuture?@"In %%d %@months":@"%%d %@months ago" withValue:components.month];
     }
     else if (components.week >= 1)
     {
         if (components.week == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"1 week ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In 1 week":@"1 week ago");
         }
-        return [self stringFromFormat:@"%%d %@weeks ago" withValue:components.week];
+        return [self stringFromFormat:isFuture?@"In %%d %@weeks":@"%%d %@weeks ago" withValue:components.week];
     }
     else if (components.day >= 1)    // up to 6 days ago
     {
         if (components.day == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"1 day ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In 1 day":@"1 day ago");
         }
-        return [self stringFromFormat:@"%%d %@days ago" withValue:components.day];
+        return [self stringFromFormat:isFuture?@"In %%d %@days":@"%%d %@days ago" withValue:components.day];
     }
     else if (components.hour >= 1)   // up to 23 hours ago
     {
         if (components.hour == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"An hour ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In an hour":@"An hour ago");
         }
-        return [self stringFromFormat:@"%%d %@hours ago" withValue:components.hour];
+        return [self stringFromFormat:isFuture?@"In %%d %@hours":@"%%d %@hours ago" withValue:components.hour];
     }
     else if (components.minute >= 1) // up to 59 minutes ago
     {
         if (components.minute == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"A minute ago");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"In a minute":@"A minute ago");
         }
-        return [self stringFromFormat:@"%%d %@minutes ago" withValue:components.minute];
+        return [self stringFromFormat:isFuture?@"In %%d %@minutes":@"%%d %@minutes ago" withValue:components.minute];
     }
     else if (components.second < 5)
     {
-        return NSDateTimeAgoLocalizedStrings(@"Just now");
+        return NSDateTimeAgoLocalizedStrings(isFuture?@"Now":@"Just now");
     }
     
     // between 5 and 59 seconds ago
-    return [self stringFromFormat:@"%%d %@seconds ago" withValue:components.second];
+    return [self stringFromFormat:isFuture?@"In %%d %@seconds":@"%%d %@seconds ago" withValue:components.second];
 }
 
 
@@ -204,6 +206,7 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
 {
     NSDate * now = [NSDate date];
     NSCalendar *calendar = [NSCalendar currentCalendar];
+    BOOL isFuture = ([self timeIntervalSinceDate:now] > 0);
     
     NSDateComponents *components = [calendar components:NSHourCalendarUnit
                                                fromDate:self
@@ -219,7 +222,7 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
                                                inUnit:NSEraCalendarUnit
                                               forDate:now];
         
-        NSInteger diffDays = endDay - startDay;
+        NSInteger diffDays = fabs(endDay - startDay);
         if (diffDays == 0) // today!
         {
             NSDateComponents * startHourComponent = [calendar components:NSHourCalendarUnit fromDate:self];
@@ -239,7 +242,7 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
         }
         else if (diffDays == 1)
         {
-            return NSDateTimeAgoLocalizedStrings(@"Yesterday");
+            return NSDateTimeAgoLocalizedStrings(isFuture?@"Tomorrow":@"Yesterday");
         }
         else
         {
@@ -249,14 +252,14 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
             NSInteger endWeek = [calendar ordinalityOfUnit:NSWeekCalendarUnit
                                                     inUnit:NSEraCalendarUnit
                                                    forDate:now];
-            NSInteger diffWeeks = endWeek - startWeek;
+            NSInteger diffWeeks = fabs(endWeek - startWeek);
             if (diffWeeks == 0)
             {
                 return NSDateTimeAgoLocalizedStrings(@"This week");
             }
             else if (diffWeeks == 1)
             {
-                return NSDateTimeAgoLocalizedStrings(@"Last week");
+                return NSDateTimeAgoLocalizedStrings(isFuture?@"Next week":@"Last week");
             }
             else
             {
@@ -266,14 +269,14 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
                 NSInteger endMonth = [calendar ordinalityOfUnit:NSMonthCalendarUnit
                                                          inUnit:NSEraCalendarUnit
                                                         forDate:now];
-                NSInteger diffMonths = endMonth - startMonth;
+                NSInteger diffMonths = fabs(endMonth - startMonth);
                 if (diffMonths == 0)
                 {
                     return NSDateTimeAgoLocalizedStrings(@"This month");
                 }
                 else if (diffMonths == 1)
                 {
-                    return NSDateTimeAgoLocalizedStrings(@"Last month");
+                    return NSDateTimeAgoLocalizedStrings(isFuture?@"Next month":@"Last month");
                 }
                 else
                 {
@@ -283,14 +286,14 @@ NSLocalizedStringFromTableInBundle(key, @"NSDateTimeAgo", [NSBundle bundleWithPa
                     NSInteger endYear = [calendar ordinalityOfUnit:NSYearCalendarUnit
                                                             inUnit:NSEraCalendarUnit
                                                            forDate:now];
-                    NSInteger diffYears = endYear - startYear;
+                    NSInteger diffYears = fabs(endYear - startYear);
                     if (diffYears == 0)
                     {
                         return NSDateTimeAgoLocalizedStrings(@"This year");
                     }
                     else if (diffYears == 1)
                     {
-                        return NSDateTimeAgoLocalizedStrings(@"Last year");
+                        return NSDateTimeAgoLocalizedStrings(isFuture?@"Next year":@"Last year");
                     }
                 }
             }
